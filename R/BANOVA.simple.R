@@ -196,7 +196,22 @@ BANOVA.simple <- function(BANOVA_output, base = NULL, quantiles = c(0.025, 0.975
     }
     
     # create.table creates tables with results used for printing
+<<<<<<< HEAD
     create.table <- function(){
+=======
+    create.table <- function(remove_last_level = F){
+      
+      is.contr.coding <- function(coding_matrix){
+        if (class(coding_matrix) == "numeric"){
+          coding_matrix <- as.matrix(coding_matrix)
+        }
+        n = dim(coding_matrix)[1]
+        k = dim(coding_matrix)[2]
+        condition = (sum(contr.sum(n) == coding_matrix) == n*k)
+        return(condition)
+      }
+      
+>>>>>>> parent of be4efc2... BANOVA.simple contrast coding check
       #fill in the results
       result_table <- matrix(NA, nrow = n_cases, ncol = ncol(table))
       # print(result_table)
@@ -209,14 +224,52 @@ BANOVA.simple <- function(BANOVA_output, base = NULL, quantiles = c(0.025, 0.975
                                  paste0("Quantile ",  max(quantiles)), "p-value")
       
       #fill in the level indices
+<<<<<<< HEAD
       index_table <- matrix(NA, nrow = nrow(effect_matrix), ncol = n_selected_vars)
       colnames(index_table) <- c(base, non_base_vars_names)
       index_table           <- matrix(as.factor(level_index[,colnames(index_table)]), ncol = n_selected_vars)
       colnames(index_table) <- c(base, non_base_vars_names)
+=======
+      index_table <- matrix(NA, nrow = nrow(effect_matrix), ncol = n_selected_vars,
+                            dimnames = list(NULL, c(base, non_base_vars_names)))
+
+      if (!is.null(BANOVA_output$contrast)){
+        variables_with_contrasts <- names(BANOVA_output$contrast)
+        index_table              <- matrix(as.factor(level_index[,colnames(index_table)]), ncol = n_selected_vars,
+                                           dimnames = list(NULL, c(base, non_base_vars_names)))
+        for (var in variables_with_contrasts){
+          if (var %in% colnames(index_table)){
+            if (!is.contr.coding(BANOVA_output$contrast[[var]])){
+              index_table[, var] <- matrix(as.factor(level_index_relabeled[, var]), ncol = length(var),
+                                           dimnames = list(NULL, var))
+              remove_last_level = TRUE
+            }
+          }
+        }
+      } else {
+        index_table           <- matrix(as.factor(level_index[,colnames(index_table)]), ncol = n_selected_vars,
+                                        dimnames = list(NULL, c(base, non_base_vars_names)))
+      }
+>>>>>>> parent of be4efc2... BANOVA.simple contrast coding check
       
       #combine tables
       result <- cbind(index_table, result_table)
       rownames(result) <- rep('', n_cases)
+<<<<<<< HEAD
+=======
+      
+      #drop last level of non base variables
+      if (remove_last_level){
+        for (var in variables_with_contrasts){
+          if (var %in% colnames(index_table)){
+            levels_factor <- unique(index_table[,var])
+            last_level    <- levels_factor[length(levels_factor)]
+            result <- result[result[, var] != last_level,]
+          }
+        }
+      }
+      
+>>>>>>> parent of be4efc2... BANOVA.simple contrast coding check
       return(list(result = result, colnames_return_table = colnames_return_table))
     }
     
@@ -285,11 +338,30 @@ BANOVA.simple <- function(BANOVA_output, base = NULL, quantiles = c(0.025, 0.975
       
       #order the effect matrix
       level_index         <- attr(effect_matrix,"levels") #combinations of levels in the effect matrix
+<<<<<<< HEAD
       non_base_vars_names <- colnames(level_index)[colnames(level_index) != base]
 
       base_order  <- order(level_index[, base])#, decreasing = T) #order of the base variable (for a two way interaction)
 
       temp_index         <- level_index
+=======
+      vars_names          <- colnames(level_index)
+      non_base_vars_names <- vars_names[vars_names != base]
+      
+      level_index_relabeled <- level_index
+      for (i in 1:ncol(level_index_relabeled)){
+        factor_levels <- unique(level_index_relabeled[,i])
+        num_levels    <- length(factor_levels)
+        for (j in 1:num_levels){
+          level_index_relabeled[,i][level_index_relabeled[,i] == factor_levels[j]] <-  paste0(vars_names[i], j)
+        }
+      }
+      #base_order  <- order(level_index[, base])
+      base_order  <- order(level_index_relabeled[, base])#, decreasing = T) #order of the base variable (for a two way interaction)
+
+      temp_index         <- level_index_relabeled
+      level_index_temp   <- level_index
+>>>>>>> parent of be4efc2... BANOVA.simple contrast coding check
       effect_matrix_temp <- effect_matrix
 
       if (n_non_base_vars != 1){
@@ -298,6 +370,11 @@ BANOVA.simple <- function(BANOVA_output, base = NULL, quantiles = c(0.025, 0.975
           order_index <- order(temp_index[, non_base_vars_names[n_non_base_vars-i]])
           temp_index  <- temp_index[order_index, ]
           effect_matrix_temp <- effect_matrix_temp[order_index, ]
+<<<<<<< HEAD
+=======
+          level_index_temp   <- level_index_temp[order_index, ]
+          level_index_relabeled <- level_index_relabeled[order_index, ]
+>>>>>>> parent of be4efc2... BANOVA.simple contrast coding check
           #level_index        <- temp_index[order_index, ]
         }
         base_order      <- order(temp_index[ ,base])
