@@ -2,11 +2,11 @@ Package: BANOVA
 Type: Package
 Title: Hierarchical Bayesian ANOVA Models
 Version: 1.1.9
-Date: 2020-12-16
+Date: 2021-03-11
 Author: Chen Dong, Michel Wedel, Anna Kopyakova
 SystemRequirements: JAGS-4.3.0, C++11
 Maintainer: Chen Dong <cdong@math.umd.edu>
-Depends: R (>= 3.6.2)
+Depends: R (>= 3.6.0)
 Imports: rjags(>= 3-13), runjags (>= 1.2.1-0), coda (>= 0.16-1), rstan(>= 2.15.1), methods
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
